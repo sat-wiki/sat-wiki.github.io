@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TLE 轨道数据分析器</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.staticfile.net/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* Custom Styles for nuances not covered by Tailwind utilities */
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background-color: #f8fafc; /* Slate-50 */
+        }
+        
+        /* Smooth transitions for view switching */
+        .view-section {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        
+        .hidden-view {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .active-view {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar for Textarea */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 50;
+        }
+        .toast {
+            background: white;
+            border-left: 4px solid;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            min-width: 300px;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        .toast.error { border-color: #ef4444; }
+        .toast.success { border-color: #22c55e; }
+        .toast i { margin-right: 0.75rem; }
+        .toast.error i { color: #ef4444; }
+        .toast.success i { color: #22c55e; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* Table Styles */
+        .data-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        .data-table tr:hover td {
+            background-color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="text-slate-700 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm z-10 flex-none">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                </div>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight">TLE 轨道数据分析器</h1>
+            </div>
+            <div class="text-sm text-slate-500">
+                <i class="fa-regular fa-clock mr-1"></i> <span id="current-time"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow relative overflow-hidden bg-slate-50">
+        
+        <!-- View 1: Input Page -->
+        <section id="input-view" class="view-section active-view absolute inset-0 overflow-y-auto p-4 sm:p-8">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-800"><i class="fa-solid fa-paste mr-2 text-blue-500"></i>输入 TLE 数据</h2>
+                        <p class="text-sm text-slate-500 mt-1">请输入标准的两行轨道根数（TLE）数据，支持批量输入多组卫星数据。</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="mb-4">
+                            <label for="tle-input" class="block text-sm font-medium text-slate-700 mb-2">TLE 数据内容</label>
+                            <textarea id="tle-input" class="w-full h-64 p-4 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono text-sm leading-relaxed resize-y" placeholder="在此粘贴 TLE 数据...
+示例：
+1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927
+2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537"></textarea>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <button onclick="loadSampleData()" class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+                                <i class="fa-solid fa-flask mr-1"></i>加载示例数据
+                            </button>
+                            <button onclick="parseAndAnalyze()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center">
+                                <i class="fa-solid fa-magnifying-glass-chart mr-2"></i>解析 TLE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Help / Info Box -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                        <div class="text-blue-500 mb-2"><i class="fa-solid fa-check-circle"></i> 格式要求</div>
+                        <p class="text-xs text-slate-500">每行必须为 69 个字符。第一行以 '1' 开头，第二行以 '2' 开头。</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                        <div class="text-indigo-500 mb-2"><i class="fa-solid fa-layer-group"></i> 批量支持</div>
+                        <p class="text-xs text-slate-500">支持一次性输入多组 TLE，系统会自动识别并分组解析。</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+                        <div class="text-teal-500 mb-2"><i class="fa-solid fa-calculator"></i> 自动计算</div>
+                        <p class="text-xs text-slate-500">自动计算轨道周期、半长轴、近远地点高度及轨道类型。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View 2: Analysis Page -->
+        <section id="analysis-view" class="view-section hidden-view absolute inset-0 overflow-y-auto bg-slate-50 p-4 sm:p-8">
+            <div class="max-w-7xl mx-auto">
+                <!-- Toolbar -->
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="goBack()" class="flex items-center text-slate-600 hover:text-slate-900 bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-2"></i>返回输入
+                    </button>
+                    <div class="text-sm text-slate-500" id="result-count">共解析 0 组数据</div>
+                </div>
+
+                <!-- Results Container -->
+                <div id="results-container" class="grid grid-cols-1 gap-6">
+                    <!-- Cards will be injected here via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // --- Constants ---
+        const CONSTANTS = {
+            GM: 398600.4418, // km^3/s^2
+            R: 6378.137,     // km (Earth Radius)
+            PI: Math.PI
+        };
+
+        // --- State ---
+        let parsedTLEs = [];
+
+        // --- DOM Elements ---
+        const inputView = document.getElementById('input-view');
+        const analysisView = document.getElementById('analysis-view');
+        const tleInput = document.getElementById('tle-input');
+        const resultsContainer = document.getElementById('results-container');
+        const resultCountLabel = document.getElementById('result-count');
+        const timeLabel = document.getElementById('current-time');
+
+        // --- Initialization ---
+        function updateTime() {
+            const now = new Date();
+            timeLabel.textContent = now.toLocaleString('zh-CN', { hour12: false });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // --- Helper Functions ---
+
+        // Toast Notification System
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconClass = type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check';
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass}"></i>
+                <span class="text-sm font-medium text-slate-700">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+
+            // Auto remove
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease-in forwards';
+                toast.addEventListener('animationend', () => {
+                    toast.remove();
+                });
+            }, 3000);
+        }
+
+        // Switch Views
+        function switchView(viewName) {
+            if (viewName === 'analysis') {
+                inputView.classList.remove('active-view');
+                inputView.classList.add('hidden-view');
+                setTimeout(() => {
+                    inputView.style.display = 'none';
+                    analysisView.style.display = 'block';
+                    // Trigger reflow
+                    void analysisView.offsetWidth; 
+                    analysisView.classList.remove('hidden-view');
+                    analysisView.classList.add('active-view');
+                }, 300);
+            } else {
+                analysisView.classList.remove('active-view');
+                analysisView.classList.add('hidden-view');
+                setTimeout(() => {
+                    analysisView.style.display = 'none';
+                    inputView.style.display = 'block';
+                    void inputView.offsetWidth;
+                    inputView.classList.remove('hidden-view');
+                    inputView.classList.add('active-view');
+                }, 300);
+            }
+        }
+
+        function loadSampleData() {
+            const sample = `ISS (ZARYA)
+1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927
+2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537
+NOAA 18
+1 28654U 05018A   08061.95843850  .00000172  00000-0  14378-3 0  4983
+2 28654  99.0872 110.4684 0013232 192.3572 167.7049 14.12929159227523`;
+            tleInput.value = sample;
+            showToast('示例数据已加载', 'success');
+        }
+
+        // --- Core Logic: TLE Parsing ---
+
+        function parseScientific(str) {
+            // TLE format: xxxxx +/- y
+            // Example: 12345-6 => 0.12345 * 10^-6
+            // Example: -12345+1 => -0.12345 * 10^1
+            if (!str || str.length < 6) return 0;
+            
+            const sign = str[0] === '-' ? -1 : 1;
+            const mantissaStr = str.substring(1, 6); // 5 digits
+            const exponentSign = str[6];
+            const exponent = parseInt(str.substring(7));
+
+            const mantissa = parseFloat(`0.${mantissaStr}`);
+            const value = sign * mantissa * Math.pow(10, exponent);
+            return value;
+        }
+
+        function parseTLEData(text) {
+            const lines = text.trim().split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+            const tleGroups = [];
+            
+            // Basic validation: Must have at least 2 lines
+            if (lines.length < 2) {
+                throw new Error("输入数据不足，至少需要两行数据（第一行和第二行）。");
+            }
+
+            let i = 0;
+            while (i < lines.length) {
+                const line = lines[i];
+                
+                // Check for optional Line 0 (Name)
+                let name = "Unknown Satellite";
+                if (!line.startsWith('1') && !line.startsWith('2')) {
+                    name = line;
+                    i++;
+                    if (i >= lines.length) break; // Name was last line, ignore
+                }
+
+                const line1 = lines[i];
+                const line2 = lines[i + 1];
+
+                // Validate Line 1 and Line 2 structure
+                if (!line1 || !line1.startsWith('1')) {
+                    throw new Error(`第 ${i+1} 行格式错误：应以 '1' 开头。`);
+                }
+                if (!line2 || !line2.startsWith('2')) {
+                    throw new Error(`第 ${i+2} 行格式错误：应以 '2' 开头或缺失。`);
+                }
+                if (line1.length !== 69 || line2.length !== 69) {
+                    throw new Error(`TLE 组（行 ${i+1}-${i+2}）长度错误：每行必须为 69 个字符。`);
+                }
+                
+                // Verify Satellite Number Match
+                const satNo1 = line1.substring(2, 7);
+                const satNo2 = line2.substring(2, 7);
+                if (satNo1 !== satNo2) {
+                    throw new Error(`TLE 组（行 ${i+1}-${i+2}）编号不匹配：${satNo1} vs ${satNo2}。`);
+                }
+
+                // Extract Data
+                const tleObj = {
+                    name: name,
+                    satNo: satNo1,
+                    classification: line1.charAt(7),
+                    intlDesignator: line1.substring(9, 17),
+                    epoch: line1.substring(18, 32),
+                    meanMotionDt: parseFloat(line1.substring(33, 43)),
+                    meanMotionDdt: parseScientific(line1.substring(44, 52)),
+                    bstar: parseScientific(line1.substring(53, 61)),
+                    ephemerisType: line1.charAt(62),
+                    elementSetNo: parseInt(line1.substring(64, 68)),
+                    checksum1: line1.charAt(68),
+                    inclination: parseFloat(line2.substring(8, 16)),
+                    raan: parseFloat(line2.substring(17, 25)),
+                    eccentricity: parseFloat(`0.${line2.substring(26, 33)}`),
+                    argPerigee: parseFloat(line2.substring(34, 42)),
+                    meanAnomaly: parseFloat(line2.substring(43, 51)),
+                    meanMotion: parseFloat(line2.substring(52, 63)),
+                    revNo: parseInt(line2.substring(63, 68)),
+                    checksum2: line2.charAt(68)
+                };
+
+                tleGroups.push(tleObj);
+                i += 2;
+            }
+            return tleGroups;
+        }
+
+        // --- Core Logic: Calculations ---
+
+        function calculateDerivedParams(tle) {
+            // Mean Motion (n) in rev/day
+            const n = tle.meanMotion;
+            
+            // Period (T) in seconds = 86400 / n
+            const T = 86400 / n;
+            
+            // Semi-major axis (a) in km
+            // a = (GM * T^2 / (4 * PI^2))^(1/3)
+            const a = Math.pow((CONSTANTS.GM * Math.pow(T, 2)) / (4 * Math.pow(CONSTANTS.PI, 2)), 1/3);
+            
+            // Perigee Height (hp)
+            // hp = a(1 - e) - R
+            const hp = a * (1 - tle.eccentricity) - CONSTANTS.R;
+            
+            // Apogee Height (ha)
+            // ha = a(1 + e) - R
+            const ha = a * (1 + tle.eccentricity) - CONSTANTS.R;
+
+            // Orbit Type based on Inclination
+            let orbitType = "倾斜轨道";
+            const inc = tle.inclination;
+            if (inc < 20) orbitType = "赤道轨道";
+            else if (inc >= 20 && inc < 80) orbitType = "倾斜轨道";
+            else if (inc >= 80 && inc <= 100) orbitType = "极地轨道";
+            else if (inc > 100) orbitType = "逆行轨道";
+
+            // Satellite Type based on Altitude (using Perigee as reference mostly)
+            let satType = "未知";
+            // Simple classification logic
+            if (hp < 2000) satType = "LEO (低地球轨道)";
+            else if (hp >= 2000 && ha < 35000) satType = "MEO (中地球轨道)";
+            else if (Math.abs(ha - 35786) < 500 && Math.abs(hp - 35786) < 500) satType = "GEO (地球同步轨道)";
+            else satType = "HEO (高椭圆轨道)";
+
+            return {
+                period: T, // seconds
+                periodMin: T / 60, // minutes
+                semiMajorAxis: a,
+                perigeeHeight: hp,
+                apogeeHeight: ha,
+                orbitType: orbitType,
+                satType: satType
+            };
+        }
+
+        // --- UI Interactions ---
+
+        function parseAndAnalyze() {
+            const text = tleInput.value;
+            if (!text.trim()) {
+                showToast("请输入 TLE 数据");
+                return;
+            }
+
+            try {
+                parsedTLEs = parseTLEData(text);
+                renderResults();
+                switchView('analysis');
+                showToast(`成功解析 ${parsedTLEs.length} 组 TLE 数据`, 'success');
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        function goBack() {
+            switchView('input');
+            // Optional: clear input? No, keep it for user convenience.
+        }
+
+        function renderResults() {
+            resultsContainer.innerHTML = '';
+            resultCountLabel.textContent = `共解析 ${parsedTLEs.length} 组数据`;
+
+            parsedTLEs.forEach((tle, index) => {
+                const derived = calculateDerivedParams(tle);
+                
+                // Format numbers
+                const fmtNum = (num, digits = 4) => num.toLocaleString('zh-CN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+                
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden";
+                
+                card.innerHTML = `
+                    <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">${tle.name}</h3>
+                            <span class="text-xs font-mono bg-slate-200 text-slate-600 px-2 py-0.5 rounded">NORAD ID: ${tle.satNo}</span>
+                        </div>
+                        <div class="flex gap-2">
+                             <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">${tle.orbitType}</span>
+                             <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">${tle.satType}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            
+                            <!-- Table 1: Raw TLE Data -->
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 border-l-4 border-blue-500 pl-2">原始轨道根数</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm data-table">
+                                        <tbody>
+                                            <tr>
+                                                <td>国际编号</td>
+                                                <td class="font-mono text-slate-600">${tle.intlDesignator}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>历元时刻</td>
+                                                <td class="font-mono text-slate-600">${tle.epoch}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>轨道倾角 (°)</td>
+                                                <td>${fmtNum(tle.inclination, 4)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>升交点赤经 (°)</td>
+                                                <td>${fmtNum(tle.raan, 4)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>偏心率</td>
+                                                <td>${tle.eccentricity.toFixed(7)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>近地点幅角 (°)</td>
+                                                <td>${fmtNum(tle.argPerigee, 4)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>平近点角 (°)</td>
+                                                <td>${fmtNum(tle.meanAnomaly, 4)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>平均运动</td>
+                                                <td>${fmtNum(tle.meanMotion, 8)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>飞行圈数</td>
+                                                <td>${tle.revNo}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Table 2: Calculated Parameters -->
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 border-l-4 border-teal-500 pl-2">计算轨道参数</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm data-table">
+                                        <tbody>
+                                            <tr>
+                                                <td>轨道周期</td>
+                                                <td>
+                                                    <span class="font-bold text-slate-700">${fmtNum(derived.periodMin, 2)}</span> min
+                                                    <span class="text-xs text-slate-400 ml-1">(${fmtNum(derived.period, 1)} s)</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>半长轴</td>
+                                                <td>${fmtNum(derived.semiMajorAxis, 3)} km</td>
+                                            </tr>
+                                            <tr>
+                                                <td>近地点高度</td>
+                                                <td class="text-orange-600 font-medium">${fmtNum(derived.perigeeHeight, 3)} km</td>
+                                            </tr>
+                                            <tr>
+                                                <td>远地点高度</td>
+                                                <td class="text-blue-600 font-medium">${fmtNum(derived.apogeeHeight, 3)} km</td>
+                                            </tr>
+                                            <tr>
+                                                <td>一阶导数</td>
+                                                <td>${tle.meanMotionDt.toExponential(4)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>二阶导数</td>
+                                                <td>${tle.meanMotionDdt.toExponential(4)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>B* 阻力项</td>
+                                                <td>${tle.bstar.toExponential(4)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>星历类型</td>
+                                                <td>${tle.ephemerisType}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(card);
+            });
+        }
+
+    </script>
+</body>
+</html>
