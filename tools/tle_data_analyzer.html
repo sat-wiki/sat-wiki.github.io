@@ -293,11 +293,8 @@ NOAA 18
             if (!str || str.length < 6) return 0;
             
             const sign = str[0] === '-' ? -1 : 1;
-            const mantissaStr = str.substring(1, 6); // 5 digits
-            const exponentSign = str[6];
-            const exponent = parseInt(str.substring(7));
-
-            const mantissa = parseFloat(`0.${mantissaStr}`);
+            const mantissa = parseFloat(`0.${str.substring(1, 6)}`);
+            const exponent = parseInt(str.substring(6, 8));
             const value = sign * mantissa * Math.pow(10, exponent);
             return value;
         }
