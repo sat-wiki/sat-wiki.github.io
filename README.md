@@ -1,22 +1,23 @@
 # sat-wiki.github.io
 
-卫星百科（Sat Wiki）的站点源码：Hugo + [Blowfish](https://blowfish.page/) 主题，构建产物直接发布在仓库根目录，由 GitHub Pages 以传统方式提供。
+SatWiki Research 的站点源码：Hugo + [Blowfish](https://blowfish.page/) 主题，构建产物直接发布在仓库根目录，由 GitHub Pages 以传统方式提供。站点语言为英文（`languages.en.toml`），只有一套语言，不做多语切换。
 
 ## 目录
 
 ```
 src/                 Hugo 工程
-  config/_default/   站点与主题配置（hugo.toml / languages.zh-cn.toml / params.toml / menus.zh-cn.toml）
+  config/_default/   站点与主题配置（hugo.toml / languages.en.toml / params.toml / menus.en.toml）
   content/           Markdown 内容
     news/            新闻稿（按日期倒序）
-    tech/            技术文章（长文、series、公式）
+    space-systems/   技术长文（子系统、轨道、series、公式）
     about/           关于
+  layouts/partials/  覆盖主题的局部模板
   static/            直接输出的静态文件：/chunqiu/、/tools/、字体
   themes/blowfish/   git submodule（不要手改）
 deploy.ps1           构建 + 清理过期文件 + 提交并推送
 ```
 
-仓库根目录的 `*.html`、`css/`、`js/`、`news/`、`tech/` 等均为构建产物，不要手动编辑；要改内容请改 `src/`。
+仓库根目录的 `*.html`、`css/`、`js/`、`news/`、`space-systems/` 等均为构建产物，不要手动编辑；要改内容请改 `src/`。
 
 ## 环境要求
 
@@ -59,7 +60,7 @@ hugo server -s src -D
 hugo new content -s src news/my-release/index.md
 ```
 
-技术文章同理，放在 `src/content/tech/<slug>/index.md`，front matter 至少写 `title`、`date`、`summary`、`categories`、`tags`；同一专题多篇用相同的 `series` 值串联。
+技术文章同理，放在 `src/content/space-systems/<slug>/index.md`，front matter 至少写 `title`、`date`、`summary`、`categories`、`tags`；同一专题多篇用相同的 `series` 值串联。
 
 ## 说明
 
