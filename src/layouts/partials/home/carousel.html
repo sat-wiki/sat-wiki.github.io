@@ -392,23 +392,55 @@
         if (prev) prev.disabled = i === 0;
         if (next) next.disabled = i === dots.length - 1;
       }
-      function goTo(i) {
+      function goTo(i, instant) {
         i = Math.min(Math.max(i, 0), dots.length - 1);
-        track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
+        track.scrollTo({ left: i * track.clientWidth, behavior: instant ? "auto" : "smooth" });
         paint(i);
       }
 
       dots.forEach(function (d) {
         d.addEventListener("click", function () {
           goTo(parseInt(d.getAttribute("data-dot"), 10));
+          restart();
         });
       });
-      if (prev) prev.addEventListener("click", function () { goTo(current() - 1); });
-      if (next) next.addEventListener("click", function () { goTo(current() + 1); });
+      if (prev) prev.addEventListener("click", function () { goTo(current() - 1); restart(); });
+      if (next) next.addEventListener("click", function () { goTo(current() + 1); restart(); });
 
       track.addEventListener("keydown", function (e) {
-        if (e.key === "ArrowLeft") { e.preventDefault(); goTo(current() - 1); }
-        if (e.key === "ArrowRight") { e.preventDefault(); goTo(current() + 1); }
+        if (e.key === "ArrowLeft") { e.preventDefault(); goTo(current() - 1); restart(); }
+        if (e.key === "ArrowRight") { e.preventDefault(); goTo(current() + 1); restart(); }
+      });
+
+      /* Autoplay: advance on a fixed dwell time, wrap to the first slide
+         without the long sweep back, and yield to anyone reading the slide. */
+      var DELAY = 7000;
+      var timer = 0;
+      var paused = false;
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function schedule() {
+        clearTimeout(timer);
+        timer = 0;
+        if (paused || reduceMotion || document.hidden || dots.length < 2) return;
+        timer = setTimeout(function () {
+          var i = current();
+          if (i >= dots.length - 1) {
+            goTo(0, true);
+          } else {
+            goTo(i + 1);
+          }
+          schedule();
+        }, DELAY);
+      }
+      function restart() { schedule(); }
+
+      root.addEventListener("pointerenter", function () { paused = true; clearTimeout(timer); timer = 0; });
+      root.addEventListener("pointerleave", function () { paused = false; schedule(); });
+      root.addEventListener("focusin", function () { paused = true; clearTimeout(timer); timer = 0; });
+      root.addEventListener("focusout", function () { paused = false; schedule(); });
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) { clearTimeout(timer); timer = 0; } else { schedule(); }
       });
 
       var raf = 0;
@@ -418,6 +450,7 @@
       });
 
       paint(0);
+      schedule();
     })();
   </script>
 {{ end }}
