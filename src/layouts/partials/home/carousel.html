@@ -1,0 +1,189 @@
+{{- /*
+  Homepage carousel.
+
+  Slides come from the `carousel` list in the homepage front matter
+  (src/content/_index.md), one entry per slide:
+      - date: 2026-12-01
+        title: "..."
+        summary: "..."
+        url: "/news/some-post/"
+        label: "News"
+  With no entries it falls back to the newest articles in mainSections.
+*/ -}}
+{{ $items := slice }}
+{{ with .Params.carousel }}
+  {{ range . }}
+    {{ $items = $items | append (dict "date" .date "title" .title "summary" .summary "url" .url "label" .label) }}
+  {{ end }}
+{{ end }}
+{{ if not $items }}
+  {{ range first 5 (where site.RegularPages "Type" "in" site.Params.mainSections) }}
+    {{ $items = $items | append (dict "date" .Date "title" .Title "summary" (.Summary | plainify | truncate 160) "url" .RelPermalink "label" (index .Params.categories 0 | default "")) }}
+  {{ end }}
+{{ end }}
+{{ $count := len $items }}
+
+{{ if $count }}
+  <div class="mt-12">
+    {{ with .Params.carouselTitle | default "Latest" }}
+      <h2 class="text-2xl font-extrabold mb-6">{{ . | emojify }}</h2>
+    {{ end }}
+
+    <style>
+      .bf-carousel-track {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        scroll-snap-type: x mandatory;
+      }
+      .bf-carousel-track::-webkit-scrollbar { display: none; }
+      .bf-carousel-slide { scroll-snap-align: start; scroll-snap-stop: always; }
+      .bf-carousel-track { scroll-behavior: smooth; }
+      @media (prefers-reduced-motion: reduce) {
+        .bf-carousel-track { scroll-behavior: auto; }
+      }
+    </style>
+
+    <div class="relative" data-carousel>
+      <div
+        class="bf-carousel-track flex overflow-x-auto snap-x gap-0 rounded-2xl"
+        data-track
+        tabindex="0"
+        aria-label="Article carousel">
+        {{ range $i, $item := $items }}
+          {{ $iso := "" }}
+          {{ $human := "" }}
+          {{ with $item.date }}
+            {{ $iso = time.Format "2006-01-02" . }}
+            {{ $human = time.Format (site.Params.dateFormat | default "2 January 2006") . }}
+          {{ end }}
+          <article
+            class="bf-carousel-slide shrink-0 grow-0 basis-full px-0.5">
+            <div
+              class="flex h-full min-h-[260px] flex-col justify-between rounded-xl border border-neutral-200/80 bg-neutral-50 px-6 py-8 dark:border-neutral-700 dark:bg-neutral-800 sm:px-10 sm:py-10">
+              <div>
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-neutral-500 dark:text-neutral-400">
+                  {{ with $human }}<time datetime="{{ $iso }}">{{ . }}</time>{{ end }}
+                  {{ with $item.label }}
+                    <span class="hidden sm:inline" aria-hidden="true">|</span>
+                    <span>{{ . }}</span>
+                  {{ end }}
+                </div>
+                <h3 class="mt-4 text-balance text-2xl font-bold leading-snug text-neutral-900 dark:text-white sm:text-3xl">
+                  {{ with $item.url }}<a href="{{ . | relLangURL }}" class="bf-icon-color-hover">{{ end }}
+                  {{ $item.title }}
+                  {{ with $item.url }}</a>{{ end }}
+                </h3>
+                {{ with $item.summary }}
+                  <p class="mt-4 max-w-2xl text-base leading-relaxed text-neutral-600 dark:text-neutral-300">
+                    {{ . }}
+                  </p>
+                {{ end }}
+              </div>
+              {{ with $item.url }}
+                <p class="mt-6">
+                  <a
+                    href="{{ . | relLangURL }}"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-primary-600 dark:text-primary-400 bf-icon-color-hover">
+                    Read article
+                    <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </p>
+              {{ end }}
+            </div>
+          </article>
+        {{ end }}
+      </div>
+
+      {{ if gt $count 1 }}
+        <div class="mt-6 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-2" role="tablist" aria-label="Choose slide">
+            {{ range $i, $item := $items }}
+              <button
+                type="button"
+                data-dot="{{ $i }}"
+                role="tab"
+                aria-label="Slide {{ add $i 1 }} of {{ $count }}"
+                class="h-2 w-2 rounded-full bg-neutral-300 transition-colors hover:bg-primary-400 dark:bg-neutral-600"
+              {{ if eq $i 0 }}aria-selected="true"{{ end }}></button>
+            {{ end }}
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              data-prev
+              aria-label="Previous slide"
+              class="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral text-neutral-600 transition-colors hover:border-primary-400 hover:text-primary-600 disabled:cursor-default disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+              <span class="relative block h-4 w-4">
+                {{ partial "icon.html" "chevron-left" }}
+              </span>
+            </button>
+            <button
+              type="button"
+              data-next
+              aria-label="Next slide"
+              class="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral text-neutral-600 transition-colors hover:border-primary-400 hover:text-primary-600 disabled:cursor-default disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
+              <span class="relative block h-4 w-4">
+                {{ partial "icon.html" "chevron-right" }}
+              </span>
+            </button>
+          </div>
+        </div>
+      {{ end }}
+    </div>
+
+    <script>
+      (function () {
+        var root = document.querySelector("[data-carousel]");
+        if (!root) return;
+        var track = root.querySelector("[data-track]");
+        var dots = Array.prototype.slice.call(root.querySelectorAll("[data-dot]"));
+        var prev = root.querySelector("[data-prev]");
+        var next = root.querySelector("[data-next]");
+        if (!track || !dots.length) return;
+
+        function current() {
+          var w = track.clientWidth || 1;
+          var i = Math.round(track.scrollLeft / w);
+          return Math.min(Math.max(i, 0), dots.length - 1);
+        }
+        function goTo(i) {
+          i = Math.min(Math.max(i, 0), dots.length - 1);
+          track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
+          paint(i);
+        }
+        function paint(i) {
+          dots.forEach(function (d, n) {
+            d.setAttribute("aria-selected", n === i ? "true" : "false");
+            d.className = d.className
+              .replace(/bg-primary-400/g, n === i ? "bg-primary-500" : "bg-neutral-300")
+              .replace(/dark:bg-primary-500/g, n === i ? "dark:bg-primary-400" : "dark:bg-neutral-600");
+          });
+          if (prev) prev.disabled = i === 0;
+          if (next) next.disabled = i === dots.length - 1;
+        }
+
+        dots.forEach(function (d) {
+          d.addEventListener("click", function () {
+            goTo(parseInt(d.getAttribute("data-dot"), 10));
+          });
+        });
+        if (prev) prev.addEventListener("click", function () { goTo(current() - 1); });
+        if (next) next.addEventListener("click", function () { goTo(current() + 1); });
+
+        track.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowLeft") { e.preventDefault(); goTo(current() - 1); }
+          if (e.key === "ArrowRight") { e.preventDefault(); goTo(current() + 1); }
+        });
+
+        var raf = 0;
+        track.addEventListener("scroll", function () {
+          if (raf) return;
+          raf = requestAnimationFrame(function () { raf = 0; paint(current()); });
+        });
+
+        paint(0);
+      })();
+    </script>
+  </div>
+{{ end }}
