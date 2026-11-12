@@ -1,7 +1,7 @@
 # -- Site Configuration --
 theme = "blowfish"
 baseURL = "https://sat-wiki.github.io/"
-defaultContentLanguage = "zh-cn"
+defaultContentLanguage = "en"
 
 enableRobotsTXT = true
 summaryLength = 120

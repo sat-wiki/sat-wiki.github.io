@@ -1,0 +1,36 @@
+# -- Main Menu --
+[[main]]
+  name = "News"
+  pageRef = "news"
+  weight = 10
+
+[[main]]
+  name = "Space Systems"
+  pageRef = "space-systems"
+  weight = 20
+
+[[main]]
+  name = "Tools"
+  url = "/tools/tle_data_analyzer.html"
+  weight = 30
+
+[[main]]
+  name = "Chunqiu"
+  url = "/chunqiu/"
+  weight = 40
+
+[[main]]
+  name = "About"
+  pageRef = "about"
+  weight = 50
+
+# -- Footer Menu --
+[[footer]]
+  name = "RSS"
+  pageRef = "news"
+  weight = 10
+
+[[footer]]
+  name = "GitHub"
+  url = "https://github.com/sat-wiki/sat-wiki.github.io"
+  weight = 20

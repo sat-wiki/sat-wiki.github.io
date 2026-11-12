@@ -1,0 +1,22 @@
+disabled = false
+locale = "en"
+label = "English"
+weight = 1
+title = "SatWiki Research"
+
+[params]
+  displayName = "English"
+  isoCode = "en"
+  rtl = false
+  dateFormat = "2 January 2006"
+  description = "Working notes on satellites, orbits and space systems: launch news, subsystem explainers and browser tools."
+  copyright = "© 2026 SatWiki Research"
+
+[params.author]
+  name = "SatWiki Research"
+  headline = "Space systems notes"
+  bio = "Working notes on satellites, orbits and space systems."
+  links = [
+    { link = "https://sat.huijiwiki.com/" },
+    { github = "https://github.com/sat-wiki" },
+  ]

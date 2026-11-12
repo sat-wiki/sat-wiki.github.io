@@ -8,7 +8,7 @@ enableCodeCopy = true
 enableStructuredBreadcrumbs = true
 enableA11y = false
 
-mainSections = ["news", "tech"]
+mainSections = ["news", "space-systems"]
 
 [header]
   layout = "fixed-fill-blur"

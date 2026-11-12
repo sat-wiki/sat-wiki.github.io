@@ -1,22 +1,23 @@
 ---
-title: "把卫星、轨道与航天技术讲清楚"
-heroCaption: "卫星百科 SAT WIKI"
-heroLead: "轨道力学、遥测参数、星座与发射记录，按主题整理成可以反复查阅的笔记。新闻稿记录节点，技术文章负责把原理讲透。"
+title: "SatWiki Research"
+heroCaption: "SPACE SYSTEMS NOTES"
+heroLead: "How satellites are built, flown and tracked: launch records and subsystem explainers, written to be checked and re-read."
 heroButtons:
-  - label: "新闻稿"
+  - label: "News"
     url: "/news/"
-  - label: "技术文章"
-    url: "/tech/"
-  - label: "TLE 数据分析器"
+  - label: "Space Systems"
+    url: "/space-systems/"
+  - label: "TLE analyzer"
     url: "/tools/tle_data_analyzer.html"
     style: "outline"
 ---
-卫星百科是一个公开的航天技术资料站，内容以两类为主：一是节点性的**新闻稿**，记录发射、星座部署、政策与事故；二是篇幅更长的**技术文章**，解释轨道、姿控、测控与载荷背后的原理。
 
-站内现有内容按主题归档：
+SatWiki Research is a public notebook on how satellites actually work. Two kinds of writing live here: news posts that record events such as launches, constellation deployments, policy decisions and failures, and longer explainers that cover the physics and engineering behind them.
 
-- **新闻稿** —— 按时间倒序，每条给出事件、时间与来源，便于回溯某次发射或某项政策的时间线。
-- **技术文章** —— 长文为主，带目录、公式与图表，按系列（series）串成可顺序阅读的专题。
-- **工具** —— 直接在浏览器里跑的[小工具](/tools/tle_data_analyzer.html)，例如 TLE 两行根数的解析与可视化。
+Everything is filed by theme:
 
-外部资料入口：[卫星百科社区站](https://sat.huijiwiki.com/) 收录更完整的条目，本站在其之外承担新闻与技术长文。
+- **News** - reverse chronological; each post states what happened, when, and on what evidence.
+- **Space Systems** - long-form pieces with tables, formulas and diagrams, grouped into series that can be read in order.
+- **Tools** - small utilities that run in the browser, such as the TLE two-line element parser.
+
+The fuller reference wiki sits at [sat.huijiwiki.com](https://sat.huijiwiki.com/). The two are complementary: that site carries encyclopedic entries, this one carries launch news and technical write-ups.

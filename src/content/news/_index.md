@@ -1,5 +1,6 @@
 ---
-title: "新闻稿"
-description: "卫星百科的新闻稿：发射、星座、政策与事故的时间线记录。"
+title: "News"
+description: "Launch, constellation, policy and failure records from SatWiki Research."
 ---
-这里是新闻稿归档，按发布时间倒序排列。每条尽量写清三件事：发生了什么、什么时候、依据是什么。
+
+News posts are archived here in reverse chronological order. Each one aims to answer three questions: what happened, when it happened, and what the claim rests on.
