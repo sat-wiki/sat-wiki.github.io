@@ -15,14 +15,9 @@
   weight = 30
 
 [[main]]
-  name = "Chunqiu"
-  url = "/chunqiu/"
-  weight = 40
-
-[[main]]
   name = "About"
   pageRef = "about"
-  weight = 50
+  weight = 40
 
 # -- Footer Menu --
 [[footer]]
