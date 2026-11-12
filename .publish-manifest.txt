@@ -44,6 +44,7 @@ news/index.html
 news/index.xml
 news/hugo-blowfish-migration/index.html
 news/page/1/index.html
+page/1/index.html
 series/index.html
 series/index.xml
 series/tle-parsing/index.html

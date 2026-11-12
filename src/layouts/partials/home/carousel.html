@@ -43,13 +43,15 @@
       --bfc-bg: #262626;
     }
     .bfc {
-      margin-top: 3rem;
+      margin-top: 0;
     }
     .bfc-heading {
       margin: 0 0 1.25rem;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--bfc-fg);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--bfc-accent);
     }
     .bfc-viewport {
       overflow: hidden;
@@ -84,16 +86,16 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 250px;
+      min-height: 320px;
       box-sizing: border-box;
-      padding: 2rem;
+      padding: 2.25rem;
       border: 1px solid var(--bfc-border);
-      border-radius: 0.75rem;
+      border-radius: 1rem;
       background: var(--bfc-bg);
     }
     @media (min-width: 640px) {
       .bfc-card {
-        padding: 2.5rem;
+        padding: 3rem;
       }
     }
     .bfc-meta {
@@ -108,16 +110,16 @@
       color: var(--bfc-border);
     }
     .bfc-title {
-      margin: 0.9rem 0 0;
-      font-size: 1.5rem;
-      line-height: 1.3;
+      margin: 1rem 0 0;
+      font-size: 1.75rem;
+      line-height: 1.25;
       font-weight: 700;
       color: var(--bfc-fg);
       text-wrap: balance;
     }
     @media (min-width: 640px) {
       .bfc-title {
-        font-size: 1.9rem;
+        font-size: 2.4rem;
       }
     }
     .bfc-title-link {
