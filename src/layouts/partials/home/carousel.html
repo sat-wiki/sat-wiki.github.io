@@ -439,6 +439,7 @@
       root.addEventListener("pointerleave", function () { paused = false; schedule(); });
       root.addEventListener("focusin", function () { paused = true; clearTimeout(timer); timer = 0; });
       root.addEventListener("focusout", function () { paused = false; schedule(); });
+      track.addEventListener("pointerdown", function () { restart(); });
       document.addEventListener("visibilitychange", function () {
         if (document.hidden) { clearTimeout(timer); timer = 0; } else { schedule(); }
       });
