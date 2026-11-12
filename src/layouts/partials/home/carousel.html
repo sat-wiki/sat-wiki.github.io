@@ -1,5 +1,7 @@
 {{- /*
-  Homepage carousel.
+  Full-bleed homepage carousel, styled after university front pages: one
+  slide fills the viewport, the article title and date sit over the image
+  with a dark scrim, dots and arrows float above the scrim.
 
   Slides come from the `carousel` list in the homepage front matter
   (src/content/_index.md), one entry per slide:
@@ -8,6 +10,7 @@
         summary: "..."
         url: "/news/some-post/"
         label: "News"
+        image: "/images/hero.jpg"     # optional; a gradient is used otherwise
   With no entries it falls back to the newest articles in mainSections.
 
   Styles are written out in full rather than as Tailwind utilities: the
@@ -16,49 +19,37 @@
 {{ $items := slice }}
 {{ with .Params.carousel }}
   {{ range . }}
-    {{ $items = $items | append (dict "date" .date "title" .title "summary" .summary "url" .url "label" .label) }}
+    {{ $items = $items | append (dict "date" .date "title" .title "summary" .summary "url" .url "label" .label "image" .image) }}
   {{ end }}
 {{ end }}
 {{ if not $items }}
   {{ range first 5 (where site.RegularPages "Type" "in" site.Params.mainSections) }}
-    {{ $items = $items | append (dict "date" .Date "title" .Title "summary" (.Summary | plainify | truncate 160) "url" .RelPermalink "label" (index .Params.categories 0 | default "")) }}
+    {{ $items = $items | append (dict "date" .Date "title" .Title "summary" (.Summary | plainify | truncate 140) "url" .RelPermalink "label" "" "image" .Params.featureimage) }}
   {{ end }}
 {{ end }}
 {{ $count := len $items }}
 
 {{ if $items }}
   <style>
-    .bfc {
-      --bfc-accent: #2563eb;
-      --bfc-fg: #171717;
-      --bfc-muted: #737373;
-      --bfc-border: #e5e5e5;
-      --bfc-bg: #fafafa;
-    }
-    html.dark .bfc {
-      --bfc-accent: #60a5fa;
-      --bfc-fg: #fafafa;
-      --bfc-muted: #a3a3a3;
-      --bfc-border: #404040;
-      --bfc-bg: #262626;
+    html,
+    body {
+      overflow-x: hidden;
     }
     .bfc {
-      margin-top: 0;
-    }
-    .bfc-heading {
-      margin: 0 0 1.25rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--bfc-accent);
+      position: relative;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      --bfc-h: 76vh;
+      background: #111;
     }
     .bfc-viewport {
+      position: relative;
+      height: var(--bfc-h);
       overflow: hidden;
-      border-radius: 0.75rem;
     }
     .bfc-track {
       display: flex;
+      height: 100%;
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory;
@@ -70,113 +61,183 @@
       display: none;
     }
     .bfc-track:focus-visible {
-      outline: 2px solid var(--bfc-accent);
-      outline-offset: 2px;
+      outline: 2px solid #fff;
+      outline-offset: -3px;
     }
     .bfc-slide {
+      position: relative;
       flex: 0 0 100%;
       width: 100%;
       max-width: 100%;
+      height: 100%;
+      overflow: hidden;
       scroll-snap-align: start;
       scroll-snap-stop: always;
-      padding: 0 1px;
-      box-sizing: border-box;
     }
-    .bfc-card {
+    .bfc-slide:nth-child(5n + 1) {
+      background: linear-gradient(160deg, #0b1f3a 0%, #173a5e 55%, #255273 100%);
+    }
+    .bfc-slide:nth-child(5n + 2) {
+      background: linear-gradient(160deg, #10182b 0%, #2a3550 60%, #46557a 100%);
+    }
+    .bfc-slide:nth-child(5n + 3) {
+      background: linear-gradient(160deg, #0d2b2b 0%, #1c4a4a 55%, #2f6b63 100%);
+    }
+    .bfc-slide:nth-child(5n + 4) {
+      background: linear-gradient(160deg, #241226 0%, #45213f 58%, #6b3a51 100%);
+    }
+    .bfc-slide:nth-child(5n + 5) {
+      background: linear-gradient(160deg, #1a1a1f 0%, #33343c 55%, #4d4f59 100%);
+    }
+    .bfc-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .bfc-scrim {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0) 34%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.28) 46%, rgba(0, 0, 0, 0) 74%);
+    }
+    .bfc-inner {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0 1.5rem 5.5rem;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      min-height: 320px;
-      box-sizing: border-box;
-      padding: 2.25rem;
-      border: 1px solid var(--bfc-border);
-      border-radius: 1rem;
-      background: var(--bfc-bg);
+      justify-content: flex-end;
+      pointer-events: none;
     }
     @media (min-width: 640px) {
-      .bfc-card {
-        padding: 3rem;
+      .bfc-inner {
+        padding: 0 2rem 6.5rem;
       }
+    }
+    @media (min-width: 1024px) {
+      .bfc-inner {
+        padding: 0 2.5rem 7rem;
+      }
+    }
+    .bfc-content {
+      pointer-events: auto;
+      max-width: 54rem;
     }
     .bfc-meta {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      color: var(--bfc-muted);
+      gap: 0.6rem;
+      margin: 0;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.82);
     }
     .bfc-sep {
-      color: var(--bfc-border);
+      color: rgba(255, 255, 255, 0.42);
     }
     .bfc-title {
-      margin: 1rem 0 0;
-      font-size: 1.75rem;
-      line-height: 1.25;
-      font-weight: 700;
-      color: var(--bfc-fg);
+      margin: 0.75rem 0 0;
+      font-size: clamp(1.6rem, 4.6vw, 3.6rem);
+      line-height: 1.13;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #fff;
       text-wrap: balance;
-    }
-    @media (min-width: 640px) {
-      .bfc-title {
-        font-size: 2.4rem;
-      }
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
     }
     .bfc-title-link {
       color: inherit;
       text-decoration: none;
+      transition: color 0.15s ease;
     }
     .bfc-title-link:hover {
-      color: var(--bfc-accent);
+      color: rgba(255, 255, 255, 0.78);
     }
     .bfc-summary {
-      margin: 1rem 0 0;
-      max-width: 46rem;
+      margin: 0.9rem 0 0;
+      max-width: 42rem;
       font-size: 1rem;
-      line-height: 1.65;
-      color: var(--bfc-muted);
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.74);
+      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
     }
     .bfc-link {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      margin-top: 1.5rem;
-      font-size: 0.9rem;
+      gap: 0.4rem;
+      margin-top: 1.4rem;
+      padding: 0.55rem 1.1rem;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 9999px;
+      font-size: 0.85rem;
       font-weight: 600;
-      color: var(--bfc-accent);
+      letter-spacing: 0.04em;
+      color: #fff;
       text-decoration: none;
+      backdrop-filter: blur(4px);
+      transition: background 0.15s ease, border-color 0.15s ease;
     }
     .bfc-link:hover {
-      text-decoration: underline;
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.8);
     }
-    .bfc-foot {
+    .bfc-controls {
+      position: absolute;
+      z-index: 3;
+      left: 0;
+      right: 0;
+      bottom: 1.5rem;
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      margin-top: 1.25rem;
+    }
+    @media (min-width: 640px) {
+      .bfc-controls {
+        padding: 0 2rem;
+        bottom: 2rem;
+      }
+    }
+    @media (min-width: 1024px) {
+      .bfc-controls {
+        padding: 0 2.5rem;
+      }
     }
     .bfc-dots {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
     .bfc-dot {
-      width: 0.5rem;
-      height: 0.5rem;
+      width: 1.5rem;
+      height: 0.25rem;
       padding: 0;
       border: 0;
       border-radius: 9999px;
-      background: var(--bfc-border);
+      background: rgba(255, 255, 255, 0.35);
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.2s ease, width 0.2s ease;
     }
     .bfc-dot.is-active {
-      background: var(--bfc-accent);
+      width: 2.5rem;
+      background: #fff;
     }
     .bfc-dot:focus-visible {
-      outline: 2px solid var(--bfc-accent);
-      outline-offset: 2px;
+      outline: 2px solid #fff;
+      outline-offset: 3px;
     }
     .bfc-arrows {
       display: flex;
@@ -187,27 +248,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 2.25rem;
-      height: 2.25rem;
+      width: 2.5rem;
+      height: 2.5rem;
       padding: 0;
-      border: 1px solid var(--bfc-border);
+      border: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 9999px;
-      background: transparent;
-      color: var(--bfc-muted);
+      background: rgba(0, 0, 0, 0.25);
+      color: #fff;
       cursor: pointer;
-      transition: color 0.15s ease, border-color 0.15s ease;
+      backdrop-filter: blur(4px);
+      transition: background 0.15s ease, border-color 0.15s ease;
     }
     .bfc-arrow:hover:not(:disabled) {
-      color: var(--bfc-accent);
-      border-color: var(--bfc-accent);
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.75);
     }
     .bfc-arrow:disabled {
-      opacity: 0.35;
+      opacity: 0.28;
       cursor: default;
     }
     .bfc-arrow svg {
-      width: 1rem;
-      height: 1rem;
+      width: 1.05rem;
+      height: 1.05rem;
     }
     @media (prefers-reduced-motion: reduce) {
       .bfc-track {
@@ -216,18 +278,9 @@
     }
   </style>
 
-  <div class="bfc" data-carousel>
-    {{ with .Params.carouselTitle | default "Latest" }}
-      <h2 class="bfc-heading">{{ . | emojify }}</h2>
-    {{ end }}
-
+  <div class="bfc" data-carousel aria-roledescription="carousel">
     <div class="bfc-viewport">
-      <div
-        class="bfc-track"
-        data-track
-        tabindex="0"
-        role="group"
-        aria-label="Article carousel">
+      <div class="bfc-track" data-track tabindex="0" role="group" aria-label="Featured articles">
         {{ range $item := $items }}
           {{ $iso := "" }}
           {{ $human := "" }}
@@ -235,9 +288,15 @@
             {{ $iso = time.Format "2006-01-02" . }}
             {{ $human = time.Format (site.Params.dateFormat | default "2 January 2006") . }}
           {{ end }}
-          <div class="bfc-slide">
-            <article class="bfc-card">
-              <div>
+          <section class="bfc-slide">
+            {{ with $item.image }}
+              {{ $src := . }}
+              {{ with $.Resources.Get . }}{{ $src = .RelPermalink }}{{ end }}
+              <img class="bfc-bg" src="{{ $src | relURL }}" alt="" decoding="async" />
+            {{ end }}
+            <div class="bfc-scrim" aria-hidden="true"></div>
+            <div class="bfc-inner">
+              <div class="bfc-content">
                 <p class="bfc-meta">
                   {{ with $human }}<time datetime="{{ $iso }}">{{ . }}</time>{{ end }}
                   {{ with $item.label }}
@@ -245,56 +304,54 @@
                     <span>{{ . }}</span>
                   {{ end }}
                 </p>
-                <h3 class="bfc-title">
+                <h2 class="bfc-title">
                   {{ with $item.url }}<a class="bfc-title-link" href="{{ . | relLangURL }}">{{ end }}
                   {{ $item.title }}
                   {{ with $item.url }}</a>{{ end }}
-                </h3>
+                </h2>
                 {{ with $item.summary }}
                   <p class="bfc-summary">{{ . }}</p>
                 {{ end }}
-              </div>
-              {{ with $item.url }}
-                <p>
+                {{ with $item.url }}
                   <a class="bfc-link" href="{{ . | relLangURL }}">
                     Read article
                     <span aria-hidden="true">&rarr;</span>
                   </a>
-                </p>
-              {{ end }}
-            </article>
-          </div>
+                {{ end }}
+              </div>
+            </div>
+          </section>
         {{ end }}
       </div>
-    </div>
 
-    {{ if gt $count 1 }}
-      <div class="bfc-foot">
-        <div class="bfc-dots" role="tablist" aria-label="Choose slide">
-          {{ range $i, $item := $items }}
-            <button
-              type="button"
-              class="bfc-dot{{ if eq $i 0 }} is-active{{ end }}"
-              data-dot="{{ $i }}"
-              role="tab"
-              aria-label="Slide {{ add $i 1 }} of {{ $count }}"
-              aria-selected="{{ if eq $i 0 }}true{{ else }}false{{ end }}"></button>
-          {{ end }}
+      {{ if gt $count 1 }}
+        <div class="bfc-controls">
+          <div class="bfc-dots" role="tablist" aria-label="Choose slide">
+            {{ range $i, $item := $items }}
+              <button
+                type="button"
+                class="bfc-dot{{ if eq $i 0 }} is-active{{ end }}"
+                data-dot="{{ $i }}"
+                role="tab"
+                aria-label="Slide {{ add $i 1 }} of {{ $count }}"
+                aria-selected="{{ if eq $i 0 }}true{{ else }}false{{ end }}"></button>
+            {{ end }}
+          </div>
+          <div class="bfc-arrows">
+            <button type="button" class="bfc-arrow" data-prev aria-label="Previous slide">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M12.5 4 7 10l5.5 6" stroke-linecap="round" />
+              </svg>
+            </button>
+            <button type="button" class="bfc-arrow" data-next aria-label="Next slide">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M7.5 4 13 10l-5.5 6" stroke-linecap="round" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="bfc-arrows">
-          <button type="button" class="bfc-arrow" data-prev aria-label="Previous slide">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-              <path d="M12.5 4 7 10l5.5 6" stroke-linecap="round" />
-            </svg>
-          </button>
-          <button type="button" class="bfc-arrow" data-next aria-label="Next slide">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-              <path d="M7.5 4 13 10l-5.5 6" stroke-linecap="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-    {{ end }}
+      {{ end }}
+    </div>
   </div>
 
   <script>
@@ -306,6 +363,18 @@
       var prev = root.querySelector("[data-prev]");
       var next = root.querySelector("[data-next]");
       if (!track || !dots.length) return;
+
+      /* Let one slide fill the screen below the header, like a campus front page. */
+      function sizeViewport() {
+        var header = document.querySelector("header");
+        var headerH = header ? header.getBoundingClientRect().height : 0;
+        var h = Math.round(window.innerHeight - headerH);
+        var min = window.innerWidth < 640 ? 420 : 520;
+        root.style.setProperty("--bfc-h", Math.max(min, h) + "px");
+      }
+      sizeViewport();
+      window.addEventListener("resize", sizeViewport);
+      window.addEventListener("orientationchange", sizeViewport);
 
       function current() {
         var w = track.clientWidth || 1;

@@ -1,16 +1,12 @@
 {{ define "main" }}
-  {{- /* Hero replaced by the article carousel; prose and recent-article cards follow. */ -}}
-  <section class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-10 lg:px-8">
-    {{ partial "home/carousel.html" . }}
-  </section>
+  {{- /* Full-bleed carousel replaces the hero; prose and recent-article cards follow. */ -}}
+  {{ partial "home/carousel.html" . }}
 
-  <section class="mx-auto max-w-7xl px-4 pb-4 pt-12 sm:px-6 lg:px-8">
-    <div class="prose prose-lg mx-auto max-w-3xl text-left dark:prose-invert">
-      {{ .Content }}
-    </div>
-  </section>
+  <div class="prose prose-lg mx-auto mt-14 max-w-3xl text-left dark:prose-invert">
+    {{ .Content }}
+  </div>
 
-  <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+  <div class="mt-4">
     {{ partial "recent-articles/main.html" . }}
-  </section>
+  </div>
 {{ end }}
