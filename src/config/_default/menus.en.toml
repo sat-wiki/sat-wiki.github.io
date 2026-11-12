@@ -17,6 +17,12 @@
   weight = 1
 
 [[main]]
+  name = "Biological Sciences Collaboration"
+  pageRef = "biological-sciences"
+  parent = "branches"
+  weight = 2
+
+[[main]]
   name = "Tools"
   url = "/tools/tle_data_analyzer.html"
   weight = 30

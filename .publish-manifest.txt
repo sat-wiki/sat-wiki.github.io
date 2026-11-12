@@ -12,6 +12,9 @@ robots.txt
 site.webmanifest
 sitemap.xml
 about/index.html
+biological-sciences/index.html
+biological-sciences/index.xml
+biological-sciences/page/1/index.html
 categories/index.html
 categories/index.xml
 categories/orbits/index.html
