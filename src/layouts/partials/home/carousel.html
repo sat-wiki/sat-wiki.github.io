@@ -9,6 +9,9 @@
         url: "/news/some-post/"
         label: "News"
   With no entries it falls back to the newest articles in mainSections.
+
+  Styles are written out in full rather than as Tailwind utilities: the
+  theme ships precompiled CSS, so utilities used only here would not exist.
 */ -}}
 {{ $items := slice }}
 {{ with .Params.carousel }}
@@ -23,167 +26,325 @@
 {{ end }}
 {{ $count := len $items }}
 
-{{ if $count }}
-  <div class="mt-12">
+{{ if $items }}
+  <style>
+    .bfc {
+      --bfc-accent: #2563eb;
+      --bfc-fg: #171717;
+      --bfc-muted: #737373;
+      --bfc-border: #e5e5e5;
+      --bfc-bg: #fafafa;
+    }
+    html.dark .bfc {
+      --bfc-accent: #60a5fa;
+      --bfc-fg: #fafafa;
+      --bfc-muted: #a3a3a3;
+      --bfc-border: #404040;
+      --bfc-bg: #262626;
+    }
+    .bfc {
+      margin-top: 3rem;
+    }
+    .bfc-heading {
+      margin: 0 0 1.25rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--bfc-fg);
+    }
+    .bfc-viewport {
+      overflow: hidden;
+      border-radius: 0.75rem;
+    }
+    .bfc-track {
+      display: flex;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-behavior: smooth;
+    }
+    .bfc-track::-webkit-scrollbar {
+      display: none;
+    }
+    .bfc-track:focus-visible {
+      outline: 2px solid var(--bfc-accent);
+      outline-offset: 2px;
+    }
+    .bfc-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      max-width: 100%;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      padding: 0 1px;
+      box-sizing: border-box;
+    }
+    .bfc-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 250px;
+      box-sizing: border-box;
+      padding: 2rem;
+      border: 1px solid var(--bfc-border);
+      border-radius: 0.75rem;
+      background: var(--bfc-bg);
+    }
+    @media (min-width: 640px) {
+      .bfc-card {
+        padding: 2.5rem;
+      }
+    }
+    .bfc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--bfc-muted);
+    }
+    .bfc-sep {
+      color: var(--bfc-border);
+    }
+    .bfc-title {
+      margin: 0.9rem 0 0;
+      font-size: 1.5rem;
+      line-height: 1.3;
+      font-weight: 700;
+      color: var(--bfc-fg);
+      text-wrap: balance;
+    }
+    @media (min-width: 640px) {
+      .bfc-title {
+        font-size: 1.9rem;
+      }
+    }
+    .bfc-title-link {
+      color: inherit;
+      text-decoration: none;
+    }
+    .bfc-title-link:hover {
+      color: var(--bfc-accent);
+    }
+    .bfc-summary {
+      margin: 1rem 0 0;
+      max-width: 46rem;
+      font-size: 1rem;
+      line-height: 1.65;
+      color: var(--bfc-muted);
+    }
+    .bfc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--bfc-accent);
+      text-decoration: none;
+    }
+    .bfc-link:hover {
+      text-decoration: underline;
+    }
+    .bfc-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .bfc-dots {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .bfc-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      padding: 0;
+      border: 0;
+      border-radius: 9999px;
+      background: var(--bfc-border);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .bfc-dot.is-active {
+      background: var(--bfc-accent);
+    }
+    .bfc-dot:focus-visible {
+      outline: 2px solid var(--bfc-accent);
+      outline-offset: 2px;
+    }
+    .bfc-arrows {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .bfc-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      padding: 0;
+      border: 1px solid var(--bfc-border);
+      border-radius: 9999px;
+      background: transparent;
+      color: var(--bfc-muted);
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .bfc-arrow:hover:not(:disabled) {
+      color: var(--bfc-accent);
+      border-color: var(--bfc-accent);
+    }
+    .bfc-arrow:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+    .bfc-arrow svg {
+      width: 1rem;
+      height: 1rem;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .bfc-track {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+
+  <div class="bfc" data-carousel>
     {{ with .Params.carouselTitle | default "Latest" }}
-      <h2 class="text-2xl font-extrabold mb-6">{{ . | emojify }}</h2>
+      <h2 class="bfc-heading">{{ . | emojify }}</h2>
     {{ end }}
 
-    <style>
-      .bf-carousel-track {
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        scroll-snap-type: x mandatory;
-      }
-      .bf-carousel-track::-webkit-scrollbar { display: none; }
-      .bf-carousel-slide { scroll-snap-align: start; scroll-snap-stop: always; }
-      .bf-carousel-track { scroll-behavior: smooth; }
-      @media (prefers-reduced-motion: reduce) {
-        .bf-carousel-track { scroll-behavior: auto; }
-      }
-    </style>
-
-    <div class="relative" data-carousel>
+    <div class="bfc-viewport">
       <div
-        class="bf-carousel-track flex overflow-x-auto snap-x gap-0 rounded-2xl"
+        class="bfc-track"
         data-track
         tabindex="0"
+        role="group"
         aria-label="Article carousel">
-        {{ range $i, $item := $items }}
+        {{ range $item := $items }}
           {{ $iso := "" }}
           {{ $human := "" }}
           {{ with $item.date }}
             {{ $iso = time.Format "2006-01-02" . }}
             {{ $human = time.Format (site.Params.dateFormat | default "2 January 2006") . }}
           {{ end }}
-          <article
-            class="bf-carousel-slide shrink-0 grow-0 basis-full px-0.5">
-            <div
-              class="flex h-full min-h-[260px] flex-col justify-between rounded-xl border border-neutral-200/80 bg-neutral-50 px-6 py-8 dark:border-neutral-700 dark:bg-neutral-800 sm:px-10 sm:py-10">
+          <div class="bfc-slide">
+            <article class="bfc-card">
               <div>
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-neutral-500 dark:text-neutral-400">
+                <p class="bfc-meta">
                   {{ with $human }}<time datetime="{{ $iso }}">{{ . }}</time>{{ end }}
                   {{ with $item.label }}
-                    <span class="hidden sm:inline" aria-hidden="true">|</span>
+                    <span class="bfc-sep" aria-hidden="true">|</span>
                     <span>{{ . }}</span>
                   {{ end }}
-                </div>
-                <h3 class="mt-4 text-balance text-2xl font-bold leading-snug text-neutral-900 dark:text-white sm:text-3xl">
-                  {{ with $item.url }}<a href="{{ . | relLangURL }}" class="bf-icon-color-hover">{{ end }}
+                </p>
+                <h3 class="bfc-title">
+                  {{ with $item.url }}<a class="bfc-title-link" href="{{ . | relLangURL }}">{{ end }}
                   {{ $item.title }}
                   {{ with $item.url }}</a>{{ end }}
                 </h3>
                 {{ with $item.summary }}
-                  <p class="mt-4 max-w-2xl text-base leading-relaxed text-neutral-600 dark:text-neutral-300">
-                    {{ . }}
-                  </p>
+                  <p class="bfc-summary">{{ . }}</p>
                 {{ end }}
               </div>
               {{ with $item.url }}
-                <p class="mt-6">
-                  <a
-                    href="{{ . | relLangURL }}"
-                    class="inline-flex items-center gap-1 text-sm font-semibold text-primary-600 dark:text-primary-400 bf-icon-color-hover">
+                <p>
+                  <a class="bfc-link" href="{{ . | relLangURL }}">
                     Read article
                     <span aria-hidden="true">&rarr;</span>
                   </a>
                 </p>
               {{ end }}
-            </div>
-          </article>
+            </article>
+          </div>
         {{ end }}
       </div>
-
-      {{ if gt $count 1 }}
-        <div class="mt-6 flex items-center justify-between gap-4">
-          <div class="flex items-center gap-2" role="tablist" aria-label="Choose slide">
-            {{ range $i, $item := $items }}
-              <button
-                type="button"
-                data-dot="{{ $i }}"
-                role="tab"
-                aria-label="Slide {{ add $i 1 }} of {{ $count }}"
-                class="h-2 w-2 rounded-full bg-neutral-300 transition-colors hover:bg-primary-400 dark:bg-neutral-600"
-              {{ if eq $i 0 }}aria-selected="true"{{ end }}></button>
-            {{ end }}
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              data-prev
-              aria-label="Previous slide"
-              class="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral text-neutral-600 transition-colors hover:border-primary-400 hover:text-primary-600 disabled:cursor-default disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-              <span class="relative block h-4 w-4">
-                {{ partial "icon.html" "chevron-left" }}
-              </span>
-            </button>
-            <button
-              type="button"
-              data-next
-              aria-label="Next slide"
-              class="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-neutral text-neutral-600 transition-colors hover:border-primary-400 hover:text-primary-600 disabled:cursor-default disabled:opacity-40 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-              <span class="relative block h-4 w-4">
-                {{ partial "icon.html" "chevron-right" }}
-              </span>
-            </button>
-          </div>
-        </div>
-      {{ end }}
     </div>
 
-    <script>
-      (function () {
-        var root = document.querySelector("[data-carousel]");
-        if (!root) return;
-        var track = root.querySelector("[data-track]");
-        var dots = Array.prototype.slice.call(root.querySelectorAll("[data-dot]"));
-        var prev = root.querySelector("[data-prev]");
-        var next = root.querySelector("[data-next]");
-        if (!track || !dots.length) return;
-
-        function current() {
-          var w = track.clientWidth || 1;
-          var i = Math.round(track.scrollLeft / w);
-          return Math.min(Math.max(i, 0), dots.length - 1);
-        }
-        function goTo(i) {
-          i = Math.min(Math.max(i, 0), dots.length - 1);
-          track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
-          paint(i);
-        }
-        function paint(i) {
-          dots.forEach(function (d, n) {
-            d.setAttribute("aria-selected", n === i ? "true" : "false");
-            d.className = d.className
-              .replace(/bg-primary-400/g, n === i ? "bg-primary-500" : "bg-neutral-300")
-              .replace(/dark:bg-primary-500/g, n === i ? "dark:bg-primary-400" : "dark:bg-neutral-600");
-          });
-          if (prev) prev.disabled = i === 0;
-          if (next) next.disabled = i === dots.length - 1;
-        }
-
-        dots.forEach(function (d) {
-          d.addEventListener("click", function () {
-            goTo(parseInt(d.getAttribute("data-dot"), 10));
-          });
-        });
-        if (prev) prev.addEventListener("click", function () { goTo(current() - 1); });
-        if (next) next.addEventListener("click", function () { goTo(current() + 1); });
-
-        track.addEventListener("keydown", function (e) {
-          if (e.key === "ArrowLeft") { e.preventDefault(); goTo(current() - 1); }
-          if (e.key === "ArrowRight") { e.preventDefault(); goTo(current() + 1); }
-        });
-
-        var raf = 0;
-        track.addEventListener("scroll", function () {
-          if (raf) return;
-          raf = requestAnimationFrame(function () { raf = 0; paint(current()); });
-        });
-
-        paint(0);
-      })();
-    </script>
+    {{ if gt $count 1 }}
+      <div class="bfc-foot">
+        <div class="bfc-dots" role="tablist" aria-label="Choose slide">
+          {{ range $i, $item := $items }}
+            <button
+              type="button"
+              class="bfc-dot{{ if eq $i 0 }} is-active{{ end }}"
+              data-dot="{{ $i }}"
+              role="tab"
+              aria-label="Slide {{ add $i 1 }} of {{ $count }}"
+              aria-selected="{{ if eq $i 0 }}true{{ else }}false{{ end }}"></button>
+          {{ end }}
+        </div>
+        <div class="bfc-arrows">
+          <button type="button" class="bfc-arrow" data-prev aria-label="Previous slide">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M12.5 4 7 10l5.5 6" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button type="button" class="bfc-arrow" data-next aria-label="Next slide">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path d="M7.5 4 13 10l-5.5 6" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    {{ end }}
   </div>
+
+  <script>
+    (function () {
+      var root = document.querySelector("[data-carousel]");
+      if (!root) return;
+      var track = root.querySelector("[data-track]");
+      var dots = Array.prototype.slice.call(root.querySelectorAll("[data-dot]"));
+      var prev = root.querySelector("[data-prev]");
+      var next = root.querySelector("[data-next]");
+      if (!track || !dots.length) return;
+
+      function current() {
+        var w = track.clientWidth || 1;
+        var i = Math.round(track.scrollLeft / w);
+        return Math.min(Math.max(i, 0), dots.length - 1);
+      }
+      function paint(i) {
+        dots.forEach(function (d, n) {
+          var on = n === i;
+          d.classList.toggle("is-active", on);
+          d.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        if (prev) prev.disabled = i === 0;
+        if (next) next.disabled = i === dots.length - 1;
+      }
+      function goTo(i) {
+        i = Math.min(Math.max(i, 0), dots.length - 1);
+        track.scrollTo({ left: i * track.clientWidth, behavior: "smooth" });
+        paint(i);
+      }
+
+      dots.forEach(function (d) {
+        d.addEventListener("click", function () {
+          goTo(parseInt(d.getAttribute("data-dot"), 10));
+        });
+      });
+      if (prev) prev.addEventListener("click", function () { goTo(current() - 1); });
+      if (next) next.addEventListener("click", function () { goTo(current() + 1); });
+
+      track.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") { e.preventDefault(); goTo(current() - 1); }
+        if (e.key === "ArrowRight") { e.preventDefault(); goTo(current() + 1); }
+      });
+
+      var raf = 0;
+      track.addEventListener("scroll", function () {
+        if (raf) return;
+        raf = requestAnimationFrame(function () { raf = 0; paint(current()); });
+      });
+
+      paint(0);
+    })();
+  </script>
 {{ end }}
