@@ -1,0 +1,6 @@
+# Fingerprinted assets carry sha512 subresource-integrity hashes computed at build
+# time. Git must store them byte-for-byte, otherwise the CRLF -> LF conversion in
+# transit breaks the hash and browsers refuse to apply the CSS/JS.
+/css/** -text
+/js/** -text
+/lib/** -text

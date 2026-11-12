@@ -55,6 +55,32 @@ $rels = Get-ChildItem -LiteralPath $build -Recurse -File | ForEach-Object {
 }
 Set-Content -LiteralPath $manifest -Value $rels -Encoding utf8
 
+# Verify that subresource-integrity hashes in the published HTML still match the
+# published files. Any line-ending rewrite between build and publish breaks them
+# and browsers then silently refuse to apply CSS/JS.
+$bad = @()
+$sha = [Security.Cryptography.SHA512]::Create()
+Get-ChildItem -LiteralPath $root -Recurse -File -Filter "*.html" |
+    Where-Object { $_.FullName -notlike "*\.git\*" -and $_.FullName -notlike "*\.build\*" } |
+    ForEach-Object {
+        $html = Get-Content -LiteralPath $_.FullName -Raw
+        foreach ($m in [regex]::Matches($html, '<(?:script|link)[^>]*integrity="sha512-([^"]+)"[^>]*>')) {
+            $tag = $m.Value
+            $pathMatch = [regex]::Match($tag, '(?:src|href)="?([^ ">]+)')
+            if (-not $pathMatch.Success) { continue }
+            $asset = $pathMatch.Groups[1].Value.Trim('"')
+            if ($asset -notmatch '^(/css/|/js/|/lib/)') { continue }
+            $file = Join-Path $root ($asset.TrimStart('/') -replace '/', '\')
+            if (-not (Test-Path -LiteralPath $file)) { $bad += "missing $asset"; continue }
+            $actual = [Convert]::ToBase64String($sha.ComputeHash([IO.File]::ReadAllBytes($file)))
+            if ($actual -ne $m.Groups[1].Value) { $bad += "hash mismatch $asset" }
+        }
+    }
+if ($bad.Count -gt 0) {
+    throw ("Subresource integrity check failed: " + ($bad -join "; ") + ". Check .gitattributes and core.autocrlf.")
+}
+Write-Host "Integrity check passed."
+
 # Commit and push.
 & $git add -A
 $status = & $git status --porcelain
