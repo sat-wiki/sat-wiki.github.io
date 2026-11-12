@@ -31,8 +31,10 @@
 
 {{ if $items }}
   <style>
-    html,
-    body {
+    /* Only the html box may clip: hiding overflow on body clips every
+       descendant paint to the body padding box and leaves white bands
+       on either side of the full-bleed carousel. */
+    html {
       overflow-x: hidden;
     }
     .bfc {
