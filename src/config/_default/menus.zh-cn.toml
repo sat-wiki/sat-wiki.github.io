@@ -1,0 +1,36 @@
+# -- Main Menu --
+[[main]]
+  name = "新闻稿"
+  pageRef = "news"
+  weight = 10
+
+[[main]]
+  name = "技术文章"
+  pageRef = "tech"
+  weight = 20
+
+[[main]]
+  name = "工具"
+  url = "/tools/tle_data_analyzer.html"
+  weight = 30
+
+[[main]]
+  name = "春秋"
+  url = "/chunqiu/"
+  weight = 40
+
+[[main]]
+  name = "关于"
+  pageRef = "about"
+  weight = 50
+
+# -- Footer Menu --
+[[footer]]
+  name = "RSS"
+  pageRef = "news"
+  weight = 10
+
+[[footer]]
+  name = "GitHub"
+  url = "https://github.com/sat-wiki/sat-wiki.github.io"
+  weight = 20
