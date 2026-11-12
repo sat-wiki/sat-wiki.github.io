@@ -63,6 +63,7 @@ hugo new content -s src news/my-release/index.md
 
 ## 说明
 
+- `src/layouts/partials/` 下有两个覆盖主题的小改动：`cta-button.html` 去掉首页按钮尾部的外链图标，`home/landing.html` 让首页正文左对齐（主题默认在桌面端居中，中文长段落读起来很碎）。改主题其它行为时同样放这里，不要动 `themes/blowfish/`。
 - `.nojekyll` 让 Pages 跳过 Jekyll，直接按文件提供 Hugo 产物。
 - `src/` 与主题 submodule 也会被 Pages 原样提供（内容与 git 仓库一致），不影响主站；如需彻底隔离，可改用 GitHub Actions 部署。
 - 主题配色、首页布局在 `src/config/_default/params.toml` 中调整；首页英雄区文案在 `src/content/_index.md` 的 front matter（`heroCaption`、`heroLead`、`heroButtons`）。
