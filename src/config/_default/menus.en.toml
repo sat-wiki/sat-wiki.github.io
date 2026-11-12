@@ -5,9 +5,16 @@
   weight = 10
 
 [[main]]
+  name = "Branches"
+  pageRef = "space-systems"
+  identifier = "branches"
+  weight = 20
+
+[[main]]
   name = "Space Systems"
   pageRef = "space-systems"
-  weight = 20
+  parent = "branches"
+  weight = 1
 
 [[main]]
   name = "Tools"
