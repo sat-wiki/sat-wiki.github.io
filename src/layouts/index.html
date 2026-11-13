@@ -1,10 +1,8 @@
 {{ define "main" }}
-  {{- /* Full-bleed carousel replaces the hero; prose and recent-article cards follow. */ -}}
+  {{- /* Full-bleed carousel replaces the hero; mission banner and recent-article cards follow. */ -}}
   {{ partial "home/carousel.html" . }}
 
-  <div class="prose prose-lg mx-auto mt-14 max-w-3xl text-left dark:prose-invert">
-    {{ .Content }}
-  </div>
+  {{ partial "home/mission.html" . }}
 
   <div class="mt-4">
     {{ partial "recent-articles/main.html" . }}

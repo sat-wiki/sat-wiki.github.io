@@ -42,13 +42,3 @@ carousel:
     url: "/news/"
     label: "News"
 ---
-
-SatWiki Research is a public notebook on how satellites actually work. Two kinds of writing live here: news posts that record events such as launches, constellation deployments, policy decisions and failures, and longer explainers that cover the physics and engineering behind them.
-
-Everything is filed by theme:
-
-- **News** - reverse chronological; each post states what happened, when, and on what evidence.
-- **Space Systems** - long-form pieces with tables, formulas and diagrams, grouped into series that can be read in order.
-- **Tools** - small utilities that run in the browser, such as the TLE two-line element parser.
-
-The fuller reference wiki sits at [sat.huijiwiki.com](https://sat.huijiwiki.com/). The two are complementary: that site carries encyclopedic entries, this one carries launch news and technical write-ups.

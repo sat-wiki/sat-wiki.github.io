@@ -1,0 +1,94 @@
+{{- /* Full-bleed mission banner. The photo is a placeholder: drop a real image
+     at src/assets/img/mission-hero.jpg and it replaces the gradient. */ -}}
+<style>
+  .bfm-mission {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    height: clamp(340px, 60vh, 620px);
+    overflow: hidden;
+    background: #0b1b2b;
+  }
+  .bfm-mission__photo {
+    position: absolute;
+    inset: 0;
+    background-color: #0b1b2b;
+    background-image:
+      radial-gradient(circle at 20% 24%, rgba(255, 255, 255, 0.45) 0 1px, transparent 1.4px),
+      radial-gradient(circle at 72% 68%, rgba(255, 255, 255, 0.35) 0 1px, transparent 1.4px),
+      radial-gradient(circle at 44% 12%, rgba(255, 255, 255, 0.3) 0 1px, transparent 1.4px),
+      radial-gradient(circle at 88% 30%, rgba(255, 255, 255, 0.25) 0 1px, transparent 1.4px),
+      linear-gradient(135deg, #0a1a2c 0%, #123553 48%, #1c6088 100%);
+    background-size: 180px 180px, 240px 240px, 320px 320px, 400px 400px, cover;
+    background-position: 0 0, 40px 60px, 90px 20px, 130px 110px, center;
+    background-repeat: repeat, repeat, repeat, repeat, no-repeat;
+  }
+  .bfm-mission__veil {
+    position: absolute;
+    inset: 0;
+    clip-path: polygon(0 0, 56% 0, 34% 100%, 0 100%);
+    background: rgba(6, 17, 30, 0.76);
+  }
+  .bfm-mission__inner {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 0.9rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(2rem, 5vw, 3.5rem);
+  }
+  .bfm-mission__eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .bfm-mission__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 3.25rem);
+    line-height: 1.1;
+    font-weight: 700;
+    color: #fff;
+  }
+  .bfm-mission__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+    padding-bottom: 0.15rem;
+  }
+  .bfm-mission__link:hover {
+    border-bottom-color: #fff;
+  }
+  @media (max-width: 767px) {
+    .bfm-mission {
+      height: clamp(300px, 52vh, 420px);
+    }
+    .bfm-mission__veil {
+      clip-path: polygon(0 0, 88% 0, 52% 100%, 0 100%);
+    }
+  }
+</style>
+<div class="bfm-mission" id="mission">
+  {{ with resources.Get "img/mission-hero.jpg" }}
+    <div class="bfm-mission__photo" style="background-image:url({{ .RelPermalink }})"></div>
+  {{ else }}
+    <div class="bfm-mission__photo"></div>
+  {{ end }}
+  <div class="bfm-mission__veil"></div>
+  <div class="bfm-mission__inner">
+    <span class="bfm-mission__eyebrow">SatWiki Research</span>
+    <h2 class="bfm-mission__title">Our Mission</h2>
+    <a class="bfm-mission__link" href="/about/">What this site is for</a>
+  </div>
+</div>
