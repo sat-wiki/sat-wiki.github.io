@@ -1,4 +1,5 @@
 # -- Theme Options --
+Logo = "img/logo-satwiki.png"
 colorScheme = "blowfish"
 defaultAppearance = "light"
 autoSwitchAppearance = true
