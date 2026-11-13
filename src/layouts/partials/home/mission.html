@@ -38,9 +38,29 @@
     justify-content: flex-end;
     align-items: flex-start;
     gap: 0.9rem;
-    max-width: 72rem;
+    max-width: 80rem;
     margin: 0 auto;
-    padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(2rem, 5vw, 3.5rem);
+    padding: 0 1.5rem clamp(2rem, 5vw, 3.5rem);
+  }
+  /* Match the page gutters (px-6 / sm:px-14 / md:px-24 / lg:px-32) so the
+     eyebrow lines up with the Recent heading below. */
+  @media (min-width: 640px) {
+    .bfm-mission__inner {
+      padding-left: 3.5rem;
+      padding-right: 3.5rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .bfm-mission__inner {
+      padding-left: 6rem;
+      padding-right: 6rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .bfm-mission__inner {
+      padding-left: 8rem;
+      padding-right: 8rem;
+    }
   }
   .bfm-mission__eyebrow {
     font-size: 0.75rem;
