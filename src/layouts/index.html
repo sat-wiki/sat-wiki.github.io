@@ -1,8 +1,29 @@
 {{ define "main" }}
-  {{- /* Full-bleed carousel replaces the hero; mission banner and recent-article cards follow. */ -}}
+  {{- /* Full-bleed carousel replaces the hero; two mirrored banners and the
+       recent-article cards follow. */ -}}
   {{ partial "home/carousel.html" . }}
 
-  {{ partial "home/mission.html" . }}
+  {{ partial "home/banner.html" (dict
+      "page" .
+      "id" "mission"
+      "side" "left"
+      "tone" "space"
+      "eyebrow" "SatWiki Research"
+      "title" "Our Mission"
+      "href" "/about/"
+      "link" "What this site is for"
+      "image" "img/mission-hero.jpg") }}
+
+  {{ partial "home/banner.html" (dict
+      "page" .
+      "id" "work"
+      "side" "right"
+      "tone" "orbit"
+      "eyebrow" "Output"
+      "title" "Our Work"
+      "href" "/news/"
+      "link" "Browse every post"
+      "image" "img/work-hero.jpg") }}
 
   <div class="mt-4">
     {{ partial "recent-articles/main.html" . }}

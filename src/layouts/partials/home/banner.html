@@ -1,0 +1,163 @@
+{{- /* Full-bleed banner with a diagonal half-veil.
+     Call: partial "home/banner.html" (dict "page" . "id" "mission" "side" "left"
+            "eyebrow" "SatWiki Research" "title" "Our Mission"
+            "href" "/about/" "link" "What this site is for" "image" "img/x.jpg")
+     side=lateral where the veil sits: "left" or "right".
+     image is optional: drop the asset at src/assets and it replaces the gradient. */ -}}
+{{- $page := .page -}}
+{{- $img := .image | default "" -}}
+{{- $side := .side | default "left" -}}
+{{- $tone := .tone | default "space" -}}
+
+{{- if not ($page.Store.Get "bfmBannerCSS") -}}
+{{- $page.Store.Set "bfmBannerCSS" true -}}
+<style>
+  .bfm-banner {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    height: clamp(340px, 60vh, 620px);
+    overflow: hidden;
+    background: #0b1b2b;
+  }
+  .bfm-banner__photo {
+    position: absolute;
+    inset: 0;
+    background-color: #0b1b2b;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+  .bfm-banner__photo--space {
+    background-image:
+      radial-gradient(circle at 20% 24%, rgba(255, 255, 255, 0.45) 0 1px, transparent 1.4px),
+      radial-gradient(circle at 72% 68%, rgba(255, 255, 255, 0.35) 0 1px, transparent 1.4px),
+      radial-gradient(circle at 44% 12%, rgba(255, 255, 255, 0.3) 0 1px, transparent 1.4px),
+      radial-gradient(circle at 88% 30%, rgba(255, 255, 255, 0.25) 0 1px, transparent 1.4px),
+      linear-gradient(135deg, #0a1a2c 0%, #123553 48%, #1c6088 100%);
+    background-size: 180px 180px, 240px 240px, 320px 320px, 400px 400px, cover;
+    background-position: 0 0, 40px 60px, 90px 20px, 130px 110px, center;
+    background-repeat: repeat, repeat, repeat, repeat, no-repeat;
+  }
+  .bfm-banner__photo--orbit {
+    background-image:
+      radial-gradient(circle at 84% 46%, rgba(0, 112, 188, 0.55) 0, rgba(0, 112, 188, 0) 52%),
+      repeating-radial-gradient(circle at 84% 46%, rgba(255, 255, 255, 0.07) 0 1px, rgba(255, 255, 255, 0) 1px 36px),
+      linear-gradient(150deg, #07131f 0%, #0d2a42 52%, #16506f 100%);
+    background-size: cover, cover, cover;
+    background-position: center, center, center;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+  }
+  /* The veil covers the lateral half and cuts the other half on the diagonal,
+     so the two banners read as a mirror pair. */
+  .bfm-banner__veil {
+    position: absolute;
+    inset: 0;
+    background: rgba(6, 17, 30, 0.76);
+  }
+  .bfm-banner--left .bfm-banner__veil {
+    clip-path: polygon(0 0, 56% 0, 34% 100%, 0 100%);
+  }
+  .bfm-banner--right .bfm-banner__veil {
+    clip-path: polygon(44% 0, 100% 0, 100% 100%, 66% 100%);
+  }
+  .bfm-banner__inner {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.9rem;
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1.5rem clamp(2rem, 5vw, 3.5rem);
+  }
+  .bfm-banner--left .bfm-banner__inner {
+    align-items: flex-start;
+  }
+  .bfm-banner--right .bfm-banner__inner {
+    align-items: flex-end;
+    text-align: right;
+  }
+  /* Match the page gutters (px-6 / sm:px-14 / md:px-24 / lg:px-32) so the
+     eyebrow lines up with the section heading below. */
+  @media (min-width: 640px) {
+    .bfm-banner__inner {
+      padding-left: 3.5rem;
+      padding-right: 3.5rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .bfm-banner__inner {
+      padding-left: 6rem;
+      padding-right: 6rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .bfm-banner__inner {
+      padding-left: 8rem;
+      padding-right: 8rem;
+    }
+  }
+  .bfm-banner__eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .bfm-banner__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 3.25rem);
+    line-height: 1.1;
+    font-weight: 700;
+    color: #fff;
+  }
+  .bfm-banner__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+    padding-bottom: 0.15rem;
+  }
+  .bfm-banner__link:hover {
+    border-bottom-color: #fff;
+  }
+  @media (max-width: 767px) {
+    .bfm-banner {
+      height: clamp(300px, 52vh, 420px);
+    }
+    .bfm-banner--left .bfm-banner__veil {
+      clip-path: polygon(0 0, 88% 0, 52% 100%, 0 100%);
+    }
+    /* Narrow screens cannot hold a mirrored wedge of that width, so the veil
+       covers most of the frame and only cuts the left edge. */
+    .bfm-banner--right .bfm-banner__veil {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 25% 100%);
+    }
+  }
+</style>
+{{- end -}}
+
+<div class="bfm-banner bfm-banner--{{ $side }}" id="{{ .id }}">
+  {{- with $img }}
+  {{- with resources.Get . }}
+    <div class="bfm-banner__photo" style="background-image:url({{ .RelPermalink }})"></div>
+  {{- else }}
+    <div class="bfm-banner__photo bfm-banner__photo--{{ $tone }}"></div>
+  {{- end }}
+  {{- else }}
+    <div class="bfm-banner__photo bfm-banner__photo--{{ $tone }}"></div>
+  {{- end }}
+  <div class="bfm-banner__veil"></div>
+  <div class="bfm-banner__inner">
+    <span class="bfm-banner__eyebrow">{{ .eyebrow }}</span>
+    <h2 class="bfm-banner__title">{{ .title }}</h2>
+    <a class="bfm-banner__link" href="{{ .href }}">{{ .link }}</a>
+  </div>
+</div>
